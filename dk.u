@@ -1,0 +1,11 @@
+## workspace
+
+  %% import { type="github-l2", repo="dkpkg/CommonsBase_Std" }
+  'import'
+  'github-l2'
+  { {
+      'CommonsBase_Std', '2.5.202604240004', {
+        'blake2b-256:e92cc20c3d8ad695013b52cbfab1152a76673243bc2624f6314eb49bf3d1beff',
+        'sha256:c50670c5324f6641c4d41ce61f62267303fb1995e2b345fb4159540d5c9e6a70',
+        'sha1:d352b35ca349e9037522df10c640f53d66c70a2d'
+      } } }
