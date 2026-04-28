@@ -12,10 +12,10 @@ CommonsBase_LLVM.Toolchain.MinGW is split into smaller parts (win32, etc.) becau
 
   $ get-object CommonsBase_LLVM.Toolchain.MinGW@21.1.8+rev-20251216 -s Release.Linux_arm64 -f ${RUNTIME}/Linux_arm64-Toolchain.MinGW-21.1.8+rev-20251216.zip
   \test(pass)\dkobjects\;{
-    "Release.Linux_arm64": "oajlt6vb4ft72no233zuehlmnhg6kqqt5dpmvty3ys5yx3jz3utpa"
+    "Release.Linux_arm64": "oz3nnt5gnboyuocwbzkz6k4azlty4jiacyxueolnivrdw4upxmsyq"
   }
 
   $ get-object CommonsBase_LLVM.Toolchain.MinGW@21.1.8+rev-20251216 -s Release.Linux_x86_64 -f ${RUNTIME}/Linux_x86_64-Toolchain.MinGW-21.1.8+rev-20251216.zip
   \test(pass)\dkobjects\;{
-    "Release.Linux_x86_64": "olz5nvxkpwrtrwpaebjs55245x7ktgotkimyrxnguqvrntyq5635q"
+    "Release.Linux_x86_64": "oxpjy4j5yd5jge7f6buzevzoz324sdpxmvb76kjftluil462odqwa"
   }

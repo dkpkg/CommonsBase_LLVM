@@ -33,7 +33,7 @@
         "commands": [
           // remove the ignored.zip file from macOS precommands
           [
-            "$(get-object CommonsBase_Std.Coreutils@0.2.2 -s Release.execution_abi -m ./coreutils.exe -e coreutils.exe -f coreutils.exe)",
+            "$(get-object CommonsBase_Std.Coreutils@0.6.0 -s Release.execution_abi -m ./coreutils.exe -e coreutils.exe -f coreutils.exe)",
             "rm",
             "-f",
             "${SLOT.request}/ignored.zip"
@@ -47,7 +47,7 @@
               "$(get-object CommonsBase_Std.Fd@10.3.0 -s Release.execution_abi -m ./fd.exe -e '*' -f fd.exe)",
               "--glob", "--type", "d",
               "-X",
-              "$(get-object CommonsBase_Std.Coreutils@0.2.2 -s Release.execution_abi -m ./coreutils.exe -e '*' -f coreutils.exe)",
+              "$(get-object CommonsBase_Std.Coreutils@0.6.0 -s Release.execution_abi -m ./coreutils.exe -e '*' -f coreutils.exe)",
               "rm", "-rf", "{}", ";", "--",
               "__pycache__",
               "${SLOT.request}"
