@@ -6,13 +6,6 @@ on:
 
 jobs:
   distribute:
-    permissions:
-      contents: write # for action-gh-release
-      id-token: write # for actions/attest-build-provenance
-      attestations: write # for actions/attest-build-provenance
-      #   required but does not work in `act`! bug: https://github.com/nektos/act/issues/6025
-      artifact-metadata: write # for actions/attest-build-provenance
-
     # The secrets created by `dksrc/dk0 prepare-version --ci github VERSION`
     # are tied to this environment only.
     environment: dk-distribution
@@ -56,6 +49,26 @@ jobs:
             experimental-mlfront-ref: ${{ github.ref_type != 'tag' && 'HEAD' }}
             #   Uncomment when testing MlFront
             # experimental-mlfront-ref: HEAD
+
+  combine:
+    needs: distribute
+    permissions:
+      contents: write # for action-gh-release
+      id-token: write # for actions/attest-build-provenance
+      attestations: write # for actions/attest-build-provenance
+      #   required but does not work in `act`! bug: https://github.com/nektos/act/issues/6025
+      artifact-metadata: write # for actions/attest-build-provenance
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner # Optional but recommended
+        uses: step-security/harden-runner@f808768d1510423e83855289c910610ca9b43176 # v2.17.0
+        with: { egress-policy: audit }
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Combine Modules
+        uses: diskuv/dk-distribute/combine@v2
 
       - name: Attest
         id: attest
