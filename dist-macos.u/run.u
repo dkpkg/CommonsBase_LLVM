@@ -12,8 +12,8 @@ CommonsBase_LLVM.Toolchain.MinGW is split into smaller parts (win32, etc.) becau
 
   $ get-object CommonsBase_LLVM.Toolchain.MinGW@21.1.8+rev-20251216 -s Release.Darwin_arm64 -f ${RUNTIME}/Darwin_arm64-Toolchain.MinGW-21.1.8+rev-20251216.zip
   \test(pass)
-  \dkobject(abi: "Release.Darwin_arm64", value_id: "oryk5chee3sax7ikfdzqjwk52jb5qxque3kvmjqxmvnmgskimejka")\;
+  \dkobject(abi: "Release.Darwin_arm64", value-id: "oryk5chee3sax7ikfdzqjwk52jb5qxque3kvmjqxmvnmgskimejka")\;
 
   $ get-object CommonsBase_LLVM.Toolchain.MinGW@21.1.8+rev-20251216 -s Release.Darwin_x86_64 -f ${RUNTIME}/Darwin_x86_64-Toolchain.MinGW-21.1.8+rev-20251216.zip
   \test(pass)
-  \dkobject(abi: "Release.Darwin_x86_64", value_id: "oqj3vkoohlvspsp2gqdopkvqkf6lu2qnwcq2hqzy55jox6fnfccoq")\;
+  \dkobject(abi: "Release.Darwin_x86_64", value-id: "oqj3vkoohlvspsp2gqdopkvqkf6lu2qnwcq2hqzy55jox6fnfccoq")\;
