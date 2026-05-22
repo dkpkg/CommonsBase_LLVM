@@ -11,10 +11,8 @@ CommonsBase_LLVM.Toolchain.MinGW is split into smaller parts (win32, etc.) becau
 - the Unix tarballs have symlinks that can't be handled by 7z on Windows
 
   $ get-object CommonsBase_LLVM.Toolchain.MinGW@21.1.8+rev-20251216 -s Release.Windows_x86_64 -f ${RUNTIME}/Windows_x86_64-Toolchain.MinGW-21.1.8+rev-20251216.zip
-  \test(pass)\dkobjects\;{
-    "Release.Windows_x86_64": "o64ezo634ckkwm4jcqvgfhkcmmqgjjzilbc6izfnds7cxolc4awuq"
-  }
+  \test(pass)
+  \dkobject(abi: "Release.Windows_x86_64", value_id: "o64ezo634ckkwm4jcqvgfhkcmmqgjjzilbc6izfnds7cxolc4awuq")\;
   $ get-object CommonsBase_LLVM.Toolchain.MinGW@21.1.8+rev-20251216 -s Release.Windows_x86 -f ${RUNTIME}/Windows_x86-Toolchain.MinGW-21.1.8+rev-20251216.zip
-  \test(pass)\dkobjects\;{
-    "Release.Windows_x86": "onlq5gja7hiksmyfpqqaouuvb27pv5ibo4v3eiowx66x7qbchgkcq"
-  }
+  \test(pass)
+  \dkobject(abi: "Release.Windows_x86", value_id: "onlq5gja7hiksmyfpqqaouuvb27pv5ibo4v3eiowx66x7qbchgkcq")\;
