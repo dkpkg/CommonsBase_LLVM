@@ -12,12 +12,12 @@ CommonsBase_LLVM.Toolchain.MinGW is split into smaller parts (win32, etc.) becau
 
   $ get-object CommonsBase_LLVM.Toolchain.MinGW@21.1.8+rev-20251216 -s Release.Windows_x86_64 -f ${RUNTIME}/Windows_x86_64-Toolchain.MinGW-21.1.8+rev-20251216.zip
   \test(pass)
-  \dk.object(abi: "Release.Windows_x86_64", value-id: "o64ezo634ckkwm4jcqvgfhkcmmqgjjzilbc6izfnds7cxolc4awuq")\;
+  \dk.object(abi: "Release.Windows_x86_64", value-id: "o75mms367qizxnimnibbubuxxfombqku3vpsefxyllffnknxwkuma")\;
 
   $ get-object CommonsBase_LLVM.Toolchain.MinGW@21.1.8+rev-20251216 -s Release.Windows_x86 -f ${RUNTIME}/Windows_x86-Toolchain.MinGW-21.1.8+rev-20251216.zip
   \test(pass)
-  \dk.object(abi: "Release.Windows_x86", value-id: "onlq5gja7hiksmyfpqqaouuvb27pv5ibo4v3eiowx66x7qbchgkcq")\;
+  \dk.object(abi: "Release.Windows_x86", value-id: "o3pi6lxf3myspx27za7j55iuiuki3qvnflewud773ch2dipamo2la")\;
 
   $ get-object CommonsBase_LLVM.Toolchain.MinGW@21.1.8+rev-20251216 -s Release.Windows_arm64 -f ${RUNTIME}/Windows_arm64-Toolchain.MinGW-21.1.8+rev-20251216.zip
   \test(pass)
-  \dk.object(abi: "Release.Windows_arm64", value-id: "orlq7klzllgtnohsmpaohi7tonfqieyelul2xhgili5jpno2pmc3a")\;
+  \dk.object(abi: "Release.Windows_arm64", value-id: "oa4x7wc3zwvp6zv7kgconhcbjqv2jkd4vz7sqjhay32bafddz322q")\;
