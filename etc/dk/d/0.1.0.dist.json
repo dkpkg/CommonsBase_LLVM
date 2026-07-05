@@ -1,0 +1,32 @@
+{
+  "continuations": {
+    "attestation": {
+      "openbsd_signify": {
+        "signature": "untrusted comment: signed by key 114e408d24621843\nRWQRTkCNJGIYQ/VJlHlqAaroe63uKH2CPMruyZWs883ECJ0ubI8fKDAH8Dw1UZoOx/KKZnPTm7I74WV/y+k2kQ6/LCmRovCkrQM=\n"
+      }
+    },
+    "continuations_to_sign": {
+      "0.2": {
+        "application": { "name": "dk0", "version": "2.4.2+rev-245" },
+        "openbsd_signify": {
+          "public_key": "untrusted comment: CommonsBase_LLVM-0.2\nRWTncb6x09WsqMtck3+sYyu5GL9+KOMQ59WX8YaLB3LCjZ6UIqs2b4EU\n"
+        }
+      },
+      "1.0": {
+        "application": { "name": "dk0", "version": "2.4.2+rev-245" },
+        "openbsd_signify": {
+          "public_key": "untrusted comment: CommonsBase_LLVM-1.0\nRWTufkKJAlN3mIWD1vL4/YL4xJ+XfEGMyaEP5sB8skwvov1e1AKjmqXv\n"
+        }
+      }
+    }
+  },
+  "id": "CommonsBase_LLVM@0.1.0",
+  "license": { "spdx": "Apache-2.0" },
+  "producer": {
+    "application": { "name": "dk0", "version": "2.4.2+rev-245" },
+    "github_slsa_v1_l2": { "repository": "dkpkg/CommonsBase_LLVM" },
+    "openbsd_signify": {
+      "public_key": "untrusted comment: CommonsBase_LLVM-0.1\nRWQRTkCNJGIYQyOA9nqG47Qz96wIPqkzTh7eGgFf164600kUWcTgpTpC\n"
+    }
+  }
+}
