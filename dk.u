@@ -16,19 +16,15 @@ Apache-2.0 WITH LLVM-exception AND ISC AND BSD-3-Clause AND MIT AND ZPL-2.1 AND 
 
 ## workspace
   %% actual_version("2.4.2.279")
+  'actual_version'
+  '2.4.2.279'
 
   %% import { type="github-l2", repo="dkpkg/CommonsBase_Std" }
   'import'
   'github-l2'
   { {
-      'CommonsBase_Std', '2.5.202606240625', {
-        'blake2b-256:6450d810180892d71647fe63c2313d17df5ce23eef80e1050a13cf7ad4417b31',
-        'sha256:9eac4142bc0a80e5b51d3b89e83069672873ec628256afe849408ab64f954100',
-        'sha1:8c02d3bf95fe54717dd1798f292c6d6688a63faa'
-      } },
-    {
-      'CommonsBase_Std', '2.5.202606240621', {
-        'blake2b-256:48b02b747e2c11ec5aa2f488ea3888b6448c531f26a5019e29531c607a644da3',
-        'sha256:c742f2841fd4a9debf2743799328cecaac7ff6b633d378fdd5e2052e720a120e',
-        'sha1:c2eb22a174c8d3224207dba535afc13198bdaf43'
+      'CommonsBase_Std', '2.6.20260718222208', {
+        'blake2b-256:d28c9e22c422e6c8ab4083eb1be597292dec46276de308106f0798633b82fc20',
+        'sha256:ec03493d6f73aa962b9df0be8ccf19be607c7cd28bb89aa2d1de3a882ad33024',
+        'sha1:c6eef19dd6c1fdd133c4e4ced6c545e08af628f4'
       } } }
