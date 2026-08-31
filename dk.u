@@ -15,7 +15,7 @@ across the macOS, Linux, and Windows ABIs.
 Apache-2.0 WITH LLVM-exception AND ISC AND BSD-3-Clause AND MIT AND ZPL-2.1 AND GPL-3.0-or-later
 
 ## workspace
-  %% actual_version("2.4.2.329")
+  %% actual_version("2.4.3.9")
   'actual_version'
   '2.4.2.279'
 
