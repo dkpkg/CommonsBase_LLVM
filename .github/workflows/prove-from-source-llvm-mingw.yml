@@ -1,0 +1,128 @@
+# FEASIBILITY SPIKE (dk-engine-opt node 52.2.1, option (v)). NOT a release workflow.
+#
+# Question: can the llvm-mingw x86_64 cross toolchain be COMPILED FROM SOURCE on the SAME
+# manylinux_2_28 image CommonsBase_LLVM's own Linux leg uses (glibc 2.28), within a standard
+# runner's disk and time, and does the result run there (glibc <= 2.28) and cross-compile a
+# Windows PE32+ exe? Today Toolchain.MinGW re-hosts the upstream prebuilt (ubuntu-22.04, glibc
+# ~2.35), which will not run on glibc 2.28.
+#
+# This lives ONLY on the side branch engine-opt/prove-from-source-llvm-mingw and triggers on push
+# to that branch (workflow_dispatch on a non-default branch is not dispatchable via the API/UI).
+# It writes nothing to any package, cuts no tag, touches no dist/*.u. It is a measurement.
+name: prove-from-source-llvm-mingw
+
+on:
+  push:
+    branches: [engine-opt/prove-from-source-llvm-mingw]
+  workflow_dispatch:
+
+jobs:
+  build-x86_64-from-source:
+    runs-on: ubuntu-latest
+    # Same image, tag and registry as CommonsBase_LLVM's own Linux_x86_64 leg
+    # (.github/workflows/distribute-0.1.yml) and CommonsBase_GNU's. glibc 2.28 + gcc-toolset-14.
+    container:
+      image: quay.io/pypa/manylinux_2_28_x86_64:2026.04.08-5
+    timeout-minutes: 350   # under GitHub's 360 min job cap; a red on time is a real result
+    env:
+      LLVM_MINGW_REF: "20251216"          # the exact upstream release Toolchain.MinGW re-hosts
+      PREFIX: /work-fromsrc/llvm-mingw     # install prefix (set to the largest mount below)
+      SRC: /work-fromsrc/src
+    steps:
+      - name: Environment and disk baseline (FAST; fails early on a missing floor)
+        run: |
+          set -euxo pipefail
+          echo "== uname / glibc =="
+          uname -a
+          ldd --version | head -1
+          echo "== mounts (pick the largest for the build) =="
+          df -h || true
+          echo "== gcc-toolset =="
+          # manylinux ships gcc-toolset-14; enable it for non-login shells.
+          if [ -f /opt/rh/gcc-toolset-14/enable ]; then . /opt/rh/gcc-toolset-14/enable; fi
+          gcc --version | head -1
+          g++ --version | head -1
+          # Build under the mount with the most free space (container overlay vs a large /mnt).
+          BEST=$(df -P / /mnt /__w 2>/dev/null | awk 'NR>1{print $4, $6}' | sort -rn | head -1 | awk '{print $2}')
+          echo "chosen build mount: ${BEST:-/}"
+          mkdir -p "${BEST:-/}/work-fromsrc"
+          ln -sfn "${BEST:-/}/work-fromsrc" /work-fromsrc
+          mkdir -p "$SRC" "$(dirname "$PREFIX")"
+          df -h /work-fromsrc
+
+      - name: Install build tools (git, cmake>=3.20, ninja, python) and fail fast if absent
+        run: |
+          set -euxo pipefail
+          dnf install -y git python3 || true
+          # cmake + ninja from pip are recent and reliable across manylinux pythons.
+          PYBIN=$(command -v python3.11 || command -v python3 || echo /opt/python/cp311-cp311/bin/python3)
+          "$PYBIN" -m pip install --quiet --upgrade pip
+          "$PYBIN" -m pip install --quiet cmake ninja
+          # Put the pip-installed cmake/ninja on PATH.
+          echo "$("$PYBIN" -c 'import sysconfig,os;print(os.path.join(sysconfig.get_paths()["scripts"]))')" >> "$GITHUB_PATH"
+          export PATH="$("$PYBIN" -c 'import sysconfig,os;print(os.path.join(sysconfig.get_paths()["scripts"]))'):$PATH"
+          git --version
+          cmake --version | head -1
+          ninja --version
+
+      - name: Clone upstream llvm-mingw at the re-hosted release tag
+        run: |
+          set -euxo pipefail
+          cd "$SRC"
+          git clone --depth 1 --branch "$LLVM_MINGW_REF" https://github.com/mstorsjo/llvm-mingw
+          ls -la llvm-mingw
+
+      - name: Build the x86_64-only cross toolchain from source (the measurement)
+        run: |
+          set -euxo pipefail
+          if [ -f /opt/rh/gcc-toolset-14/enable ]; then . /opt/rh/gcc-toolset-14/enable; fi
+          PYBIN=$(command -v python3.11 || command -v python3)
+          export PATH="$("$PYBIN" -c 'import sysconfig,os;print(sysconfig.get_paths()["scripts"])'):$PATH"
+          cd "$SRC/llvm-mingw"
+          START=$(date +%s)
+          echo "BUILD START $(date -u +%FT%TZ)"
+          # x86_64 target runtimes only; build-all.sh is the documented top-level entry.
+          TOOLCHAIN_ARCHS="x86_64" ./build-all.sh "$PREFIX"
+          END=$(date +%s)
+          echo "BUILD END $(date -u +%FT%TZ)"
+          echo "WALL_SECONDS=$((END-START))"
+          echo "== disk after build =="
+          df -h /work-fromsrc || true
+          du -sh "$PREFIX" || true
+          du -sh "$SRC/llvm-mingw" || true
+
+      - name: Verify glibc floor of the produced driver binaries (<= 2.28 required)
+        run: |
+          set -euxo pipefail
+          CLANG="$PREFIX/bin/clang"
+          test -x "$CLANG"
+          echo "== dynamic deps of the produced clang =="
+          ldd "$CLANG" || true
+          echo "== max GLIBC_ version the produced clang/lld require =="
+          MAXV=$(objdump -T "$PREFIX/bin/"* 2>/dev/null | grep -o 'GLIBC_[0-9.]*' | sort -V | tail -1 || true)
+          echo "MAX_GLIBC_REQUIRED=${MAXV:-none}"
+          # Fail if anything needs newer than 2.28 (the manylinux_2_28 floor).
+          if [ -n "${MAXV:-}" ]; then
+            HI=$(printf '%s\n' "GLIBC_2.28" "$MAXV" | sort -V | tail -1)
+            if [ "$HI" != "GLIBC_2.28" ]; then
+              echo "FAIL: produced toolchain requires $MAXV (> 2.28); it would not run on the manylinux leg"
+              exit 1
+            fi
+          fi
+          echo "OK: produced toolchain requires <= GLIBC_2.28"
+
+      - name: Cross-compile a Windows PE32+ smoke test with the from-source toolchain
+        run: |
+          set -euxo pipefail
+          printf '#include <stdio.h>\nint main(void){printf("hello from cross\\n");return 0;}\n' > /tmp/hello.c
+          "$PREFIX/bin/x86_64-w64-mingw32-clang" /tmp/hello.c -o /tmp/hello.exe
+          file /tmp/hello.exe
+          file /tmp/hello.exe | grep -q "PE32+" && echo "OK: produced a PE32+ Windows executable"
+
+      - name: Summarize (peak disk, wall time, glibc floor)
+        if: always()
+        run: |
+          set -uxo pipefail
+          echo "== FINAL SUMMARY =="
+          df -h || true
+          echo "PREFIX size:"; du -sh "$PREFIX" 2>/dev/null || echo "(no prefix; build did not complete)"
