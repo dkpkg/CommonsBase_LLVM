@@ -80,7 +80,9 @@ jobs:
           echo "BUILD START $(date -u +%FT%TZ)"
           # DEST is positional; unset PREFIX so build-all.sh does not mistake it for a pre-set one.
           unset PREFIX
-          TOOLCHAIN_ARCHS="x86_64" ./build-all.sh "$DEST"
+          # --use-linker=bfd: gcc-toolset-14's ld.gold rejects --dependency-file (which CMake's
+          # Ninja generator emits); ld.bfd (binutils ~2.41) supports it. No ld.lld exists yet.
+          TOOLCHAIN_ARCHS="x86_64" ./build-all.sh --use-linker=bfd "$DEST"
           END=$(date +%s)
           echo "BUILD END $(date -u +%FT%TZ)"
           echo "WALL_SECONDS=$((END-START))"
