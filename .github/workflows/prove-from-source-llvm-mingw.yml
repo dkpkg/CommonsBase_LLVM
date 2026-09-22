@@ -8,6 +8,10 @@
 #
 # Lives ONLY on the side branch engine-opt/prove-from-source-llvm-mingw and triggers on push to
 # it. Writes no package, cuts no tag, touches no distribution file. It is a measurement.
+#
+# NOTE the destination is passed to build-all.sh as a POSITIONAL, and the script has its own
+# internal $PREFIX; naming our env var PREFIX made the script see it pre-set and reject the
+# positional as a stray PGO dest. Our var is DEST, and we unset PREFIX before the call.
 name: prove-from-source-llvm-mingw
 
 on:
@@ -18,18 +22,15 @@ on:
 jobs:
   build-x86_64-from-source:
     runs-on: ubuntu-latest
-    # Same image, tag and registry as the Linux_x86_64 leg. glibc 2.28 + gcc-toolset-14.
     container:
       image: quay.io/pypa/manylinux_2_28_x86_64:2026.04.08-5
-    timeout-minutes: 350   # under GitHub's 360 min job cap; a red on time is a real result
+    timeout-minutes: 350
     defaults:
       run:
-        # bash (manylinux has it), -eux, and NO pipefail (informational "cmd | head" lines would
-        # otherwise SIGPIPE the producer and abort the step, which is what killed the first run).
         shell: bash --noprofile --norc -eux {0}
     env:
-      LLVM_MINGW_REF: "20251216"          # the exact upstream release the cross toolchain re-hosts
-      PREFIX: /work-fromsrc/llvm-mingw     # install prefix (points at the largest mount, set below)
+      LLVM_MINGW_REF: "20251216"
+      DEST: /work-fromsrc/llvm-mingw
       SRC: /work-fromsrc/src
     steps:
       - name: Environment and disk baseline (FAST; fails early on a missing floor)
@@ -43,12 +44,11 @@ jobs:
           if [ -f /opt/rh/gcc-toolset-14/enable ]; then . /opt/rh/gcc-toolset-14/enable; fi
           gcc --version | sed -n 1p
           g++ --version | sed -n 1p
-          # Build under the mount with the most free space (container overlay vs a large /mnt).
           BEST=$(df -P / /mnt /__w 2>/dev/null | awk 'NR>1{print $4, $6}' | sort -rn | sed -n 1p | awk '{print $2}')
           echo "chosen build mount: ${BEST:-/}"
           mkdir -p "${BEST:-/}/work-fromsrc"
           ln -sfn "${BEST:-/}/work-fromsrc" /work-fromsrc
-          mkdir -p "$SRC" "$(dirname "$PREFIX")"
+          mkdir -p "$SRC" "$(dirname "$DEST")"
           df -h /work-fromsrc
 
       - name: Install build tools (git, cmake>=3.20, ninja, python) and fail fast if absent
@@ -78,24 +78,25 @@ jobs:
           cd "$SRC/llvm-mingw"
           START=$(date +%s)
           echo "BUILD START $(date -u +%FT%TZ)"
-          # x86_64 target runtimes only; build-all.sh is the documented top-level entry.
-          TOOLCHAIN_ARCHS="x86_64" ./build-all.sh "$PREFIX"
+          # DEST is positional; unset PREFIX so build-all.sh does not mistake it for a pre-set one.
+          unset PREFIX
+          TOOLCHAIN_ARCHS="x86_64" ./build-all.sh "$DEST"
           END=$(date +%s)
           echo "BUILD END $(date -u +%FT%TZ)"
           echo "WALL_SECONDS=$((END-START))"
           echo "== disk after build =="
           df -h /work-fromsrc || true
-          du -sh "$PREFIX" || true
+          du -sh "$DEST" || true
           du -sh "$SRC/llvm-mingw" || true
 
       - name: Verify glibc floor of the produced driver binaries (<= 2.28 required)
         run: |
-          CLANG="$PREFIX/bin/clang"
+          CLANG="$DEST/bin/clang"
           test -x "$CLANG"
           echo "== dynamic deps of the produced clang =="
           ldd "$CLANG" || true
           echo "== max GLIBC_ version the produced clang/lld require =="
-          MAXV=$(objdump -T "$PREFIX/bin/"* 2>/dev/null | grep -o 'GLIBC_[0-9.]*' | sort -V | tail -1 || true)
+          MAXV=$(objdump -T "$DEST/bin/"* 2>/dev/null | grep -o 'GLIBC_[0-9.]*' | sort -V | tail -1 || true)
           echo "MAX_GLIBC_REQUIRED=${MAXV:-none}"
           if [ -n "${MAXV:-}" ]; then
             HI=$(printf '%s\n%s\n' "GLIBC_2.28" "$MAXV" | sort -V | tail -1)
@@ -109,14 +110,14 @@ jobs:
       - name: Cross-compile a Windows PE32+ smoke test with the from-source toolchain
         run: |
           printf '#include <stdio.h>\nint main(void){printf("hello from cross\\n");return 0;}\n' > /tmp/hello.c
-          "$PREFIX/bin/x86_64-w64-mingw32-clang" /tmp/hello.c -o /tmp/hello.exe
+          "$DEST/bin/x86_64-w64-mingw32-clang" /tmp/hello.c -o /tmp/hello.exe
           file /tmp/hello.exe
           file /tmp/hello.exe | grep -q "PE32+" && echo "OK: produced a PE32+ Windows executable"
 
       - name: Summarize (peak disk, wall time, glibc floor)
         if: always()
-        shell: bash --noprofile --norc -ux {0}   # no -e: best-effort summary
+        shell: bash --noprofile --norc -ux {0}
         run: |
           echo "== FINAL SUMMARY =="
           df -h || true
-          du -sh "$PREFIX" 2>/dev/null || echo "(no prefix; build did not complete)"
+          du -sh "$DEST" 2>/dev/null || echo "(no dest; build did not complete)"
